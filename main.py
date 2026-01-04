@@ -10,6 +10,3 @@ def main():
     analisar_neotin()
     analisar_neomater()
     analisar_prontobaby()
-
-
-main()
