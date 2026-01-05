@@ -28,11 +28,35 @@ def analisar_prontobaby():
     # Criar diretório de resultados se não existir
     os.makedirs("Prestador/prontobaby/resultado", exist_ok=True)
     
-    # Lista para armazenar os dados consolidados
-    dados_consolidados = []
-    nao_listados_consolidados = []
+    # Dicionário para armazenar os dados consolidados
+    dados_consolidados = {}
+    nao_listados_consolidados = {}
     
-    # Primeiro processar todos os municípios e coletar os dados
+    # Primeiro, inicializar todos os procedimentos com zeros para todos os municípios
+    # Definir grupos de procedimentos (apenas os nomes primeiro)
+    nomes_grupos = [
+        "PACOTE PRÉ-OPERATÓRIO PEDIÁTRICO OTORRINO",
+        "PACOTE PRÉ-OPERATÓRIO PEDIÁTRICO CIRURGIA GERAL",
+        "PACOTE PRÉ-OPERATÓRIO PEDIÁTRICO OFTALMOLOGISTA",
+        "ADENOIDECTOMIA PEDIÁTRICO",
+        "AMIGDALECTOMIA - PEDIATRICO",
+        "AMIGDALECTOMIA COM ADENOIDECTOMIA - PEDIATRICO",
+        "TRATAMENTO CIRÚRGICO DE PERFURAÇÃO DO SEPTO NASAL - PEDIATRICO",
+        "CORREÇÃO CIRÚRGICA DE ESTRABISMO (ACIMA DE 2 MUSCULOS) - PEDIATRICO",
+        "HERNIOPLASTIA INGUINAL (BILATERAL) - PEDIATRICO",
+        "HERNIOPLASTIA UMBILICAL - PEDIATRICO",
+        "ORQUIDOPEXIA BILATERAL - PEDIATRICO",
+        "TRATAMENTO CIRÚRGICO DE HIDROCELE - PEDIATRICO",
+        "CORRECAO DE HIPOSPADIA (1º TEMPO) - PEDIATRICO",
+        "PLASTICA TOTAL DO PENIS - PEDIATRICO",
+        "POSTECTOMIA - PEDIATRICO"
+    ]
+    
+    # Inicializar todos os procedimentos com zeros para todos os municípios
+    for nome_grupo in nomes_grupos:
+        dados_consolidados[nome_grupo] = {municipio: 0 for municipio in municipios}
+    
+    # Processar todos os municípios
     for municipio in municipios:
         try:
             print(f"\n=== PROCESSANDO {municipio} ===")
@@ -63,15 +87,10 @@ def analisar_prontobaby():
             # Verificar se as colunas existem na tabela
             if coluna_procedimento not in tabela.columns or coluna_quantidade not in tabela.columns:
                 print(f"  Aviso: Colunas para '{municipio}' não encontradas na tabela!")
-                # Adicionar dados vazios para este município
-                dados_municipio = {
-                    "Procedimento": [],
-                    municipio: []
-                }
-                dados_consolidados.append(dados_municipio)
+                # Manter zeros para este município
                 continue
             
-            # Definir grupos de procedimentos
+            # Definir mapeamento de grupos para listas de procedimentos
             grupos = {
                 "PACOTE PRÉ-OPERATÓRIO PEDIÁTRICO OTORRINO": otorrino or [],
                 "PACOTE PRÉ-OPERATÓRIO PEDIÁTRICO CIRURGIA GERAL": geral or [],
@@ -90,8 +109,8 @@ def analisar_prontobaby():
                 "POSTECTOMIA - PEDIATRICO": postec or [],
             }
             
-            # Processar todos os grupos
-            totais = {}
+            # Processar todos os grupos para este município
+            soma_total = 0
             for nome_grupo, lista_procedimentos in grupos.items():
                 total_grupo = 0
                 for procedimento in lista_procedimentos:
@@ -108,23 +127,20 @@ def analisar_prontobaby():
                     
                     total_grupo += quantidade_num
                 
-                totais[nome_grupo] = total_grupo
-            
-            # Adicionar dados deste município à lista consolidada
-            dados_municipio = {
-                "Procedimento": list(totais.keys()),
-                municipio: list(totais.values())
-            }
-            dados_consolidados.append(dados_municipio)
+                # Atualizar valor para este município
+                dados_consolidados[nome_grupo][municipio] = total_grupo
+                soma_total += total_grupo
             
             # Imprimir resultados no console
             print(f"Resultados para {municipio}:")
-            soma_total = sum(totais.values())
-            for nome, total in totais.items():
-                print(f"  {nome}: {total}")
+            for nome_grupo in nomes_grupos:
+                valor = dados_consolidados[nome_grupo][municipio]
+                if valor > 0:  # Mostrar apenas os que têm valor > 0
+                    print(f"  {nome_grupo}: {valor}")
+            
             print(f"  Soma Total: {soma_total}")
             
-            # Identificar procedimentos não mapeados (SOMENTE SE HOUVER PROCEDIMENTOS NA COLUNA)
+            # Identificar procedimentos não mapeados
             procedimentos_na_coluna = tabela[coluna_procedimento].dropna().unique()
             if len(procedimentos_na_coluna) > 0:
                 todos_procedimentos_conhecidos = []
@@ -139,7 +155,6 @@ def analisar_prontobaby():
                 procedimentos_na_coluna = [str(p).strip() for p in procedimentos_na_coluna if p and str(p).strip()]
                 
                 # Identificar procedimentos não mapeados
-                procedimentos_nao_mapeados = {}
                 for procedimento in procedimentos_na_coluna:
                     if procedimento not in todos_procedimentos_conhecidos:
                         mask = tabela[coluna_procedimento].astype(str) == procedimento
@@ -151,87 +166,135 @@ def analisar_prontobaby():
                             quantidade_num = 0
                         
                         if quantidade_num > 0:  # Só incluir se tiver quantidade > 0
-                            procedimentos_nao_mapeados[procedimento] = quantidade_num
+                            # Inicializar a entrada para este procedimento se não existir
+                            if procedimento not in nao_listados_consolidados:
+                                nao_listados_consolidados[procedimento] = {m: 0 for m in municipios}
+                            
+                            # Adicionar valor para este município
+                            nao_listados_consolidados[procedimento][municipio] = quantidade_num
                 
-                # Adicionar não listados à lista consolidada APENAS SE EXISTIREM
-                if procedimentos_nao_mapeados:
-                    procedimentos_nao_mapeados = dict(sorted(
-                        procedimentos_nao_mapeados.items(), 
-                        key=lambda x: x[1], 
-                        reverse=True
-                    ))
+                if nao_listados_consolidados:
+                    total_nao_mapeado = 0
+                    for proc in nao_listados_consolidados:
+                        if municipio in nao_listados_consolidados[proc]:
+                            total_nao_mapeado += nao_listados_consolidados[proc][municipio]
                     
-                    print(f"\n  Procedimentos não mapeados encontrados: {len(procedimentos_nao_mapeados)}")
-                    total_nao_mapeado = sum(procedimentos_nao_mapeados.values())
+                    print(f"  Procedimentos não mapeados encontrados: {len([p for p in nao_listados_consolidados if nao_listados_consolidados[p][municipio] > 0])}")
                     print(f"    Total não mapeado: {total_nao_mapeado}")
-                    
-                    # Adicionar dados não listados à lista consolidada
-                    nao_listados_municipio = {
-                        "Procedimento Nao listados": list(procedimentos_nao_mapeados.keys()),
-                        municipio: list(procedimentos_nao_mapeados.values()),
-                    }
-                    nao_listados_consolidados.append(nao_listados_municipio)
-                else:
-                    print(f"  Nenhum procedimento não mapeado encontrado para {municipio}")
-            else:
-                print(f"  Nenhum procedimento encontrado na coluna para {municipio}")
             
         except FileNotFoundError:
             print(f"  ERRO: Arquivo {arquivo} não encontrado!")
-            
         except Exception as e:
             print(f"  ERRO em {municipio}: {str(e)}")
     
-    # AGORA CRIAR OS ARQUIVOS CONSOLIDADOS
+    # CRIAR OS ARQUIVOS CONSOLIDADOS
     print(f"\n=== CRIANDO ARQUIVOS CONSOLIDADOS ===")
     
     # 1. Criar DataFrame consolidado com todos os municípios lado a lado
     if dados_consolidados:
-        # Começar com o primeiro município
-        df_consolidado = pd.DataFrame(dados_consolidados[0])
+        # Converter dicionário para DataFrame
+        df_consolidado = pd.DataFrame.from_dict(dados_consolidados, orient='index')
         
-        # Juntar os outros municípios
-        for i in range(1, len(dados_consolidados)):
-            if dados_consolidados[i]["Procedimento"]:
-                df_temp = pd.DataFrame(dados_consolidados[i])
-                # Mesclar pelo nome do procedimento
-                df_consolidado = pd.merge(df_consolidado, df_temp, on="Procedimento", how="outer")
-            else:
-                # Se não houver dados, adicionar coluna vazia
-                municipio_nome = list(dados_consolidados[i].keys())[1] if len(dados_consolidados[i]) > 1 else "Município Desconhecido"
-                df_consolidado[municipio_nome] = 0
+        # Garantir que todas as colunas (municípios) existam na ordem correta
+        for municipio in municipios:
+            if municipio not in df_consolidado.columns:
+                df_consolidado[municipio] = 0
         
-        # Ordenar os procedimentos
-        ordem_procedimentos = list(dados_consolidados[0]["Procedimento"]) if dados_consolidados[0]["Procedimento"] else []
-        df_consolidado = df_consolidado.set_index("Procedimento").loc[ordem_procedimentos].reset_index()
+        # Reordenar as colunas na ordem dos municípios
+        df_consolidado = df_consolidado[municipios]
         
-        # Preencher NaN com 0
-        df_consolidado = df_consolidado.fillna(0)
+        # Reordenar as linhas (procedimentos) na ordem desejada
+        df_consolidado = df_consolidado.loc[nomes_grupos]
         
-        # Salvar arquivo consolidado
-        df_consolidado.to_excel("Prestador/prontobaby/resultado/relatorio-prontobaby.xlsx", index=False)
-        print("✓ Arquivo consolidado criado: relatorio-prontobaby.xlsx")
+        # Adicionar uma linha com o TOTAL por município
+        totais_municipios = df_consolidado.sum()
+        df_consolidado.loc['TOTAL'] = totais_municipios
+        
+        # ========== RELATÓRIO 1: APENAS VALORES (SEM CABEÇALHOS) ==========
+        print("\n--- CRIANDO RELATÓRIO 1: APENAS VALORES ---")
+        
+        # Criar uma cópia dos dados apenas com valores (sem índices)
+        df_apenas_valores = df_consolidado.copy()
+        
+        # Salvar apenas os valores (sem cabeçalhos de coluna e sem índice)
+        caminho_apenas_valores = "Prestador/prontobaby/resultado/relatorio_prontobaby_APENAS_VALORES.xlsx"
+        
+        # Criar um ExcelWriter para salvar sem cabeçalhos
+        with pd.ExcelWriter(caminho_apenas_valores, engine='openpyxl') as writer:
+            # Salvar sem cabeçalhos de coluna e sem índice
+            df_apenas_valores.to_excel(writer, sheet_name='Valores', 
+                                       header=False, index=False)
+        
+        print(f"✓ Relatório 1 criado: {caminho_apenas_valores}")
+        print(f"  Shape: {df_apenas_valores.shape}")
+        
+        # ========== RELATÓRIO 2: RELATÓRIO COMPLETO ==========
+        print("\n--- CRIANDO RELATÓRIO 2: RELATÓRIO COMPLETO ---")
+        
+        # Reset index para ter a coluna "Procedimento" no relatório completo
+        df_completo = df_consolidado.reset_index()
+        df_completo = df_completo.rename(columns={'index': 'Procedimento'})
+        
+        # Preencher NaN com 0 (para garantir)
+        df_completo = df_completo.fillna(0)
+        
+        # Salvar arquivo consolidado completo
+        caminho_completo = "Prestador/prontobaby/resultado/relatorio_prontobaby_COMPLETO.xlsx"
+        df_completo.to_excel(caminho_completo, index=False)
+        
+        print(f"✓ Relatório 2 criado: {caminho_completo}")
+        print(f"  Shape do DataFrame: {df_completo.shape}")
+        
+        # Mostrar preview dos dados completos
+        print("\nPreview do relatório completo:")
+        print(df_completo.head())
+        
+        # Mostrar totais por município
+        print("\nTotais por município:")
+        for municipio in municipios:
+            total = totais_municipios[municipio]
+            print(f"  {municipio}: {total}")
+        
+        # Mostrar formato dos dois relatórios
+        print("\n--- RESUMO DOS RELATÓRIOS ---")
+        print(f"Relatório 1 (apenas valores): {df_apenas_valores.shape[0]} linhas x {df_apenas_valores.shape[1]} colunas")
+        print(f"Relatório 2 (completo): {df_completo.shape[0]} linhas x {df_completo.shape[1]} colunas")
+        
+        # Exemplo de como ficam os dados
+        print("\nExemplo dos dados (primeiras 3 linhas):")
+        print("Relatório 1 (apenas valores):")
+        print(df_apenas_valores.iloc[:3, :3].to_string(header=False, index=False))
+        print("\nRelatório 2 (completo):")
+        print(df_completo.iloc[:3, :3].to_string(index=False))
     
-    # 2. Criar DataFrame consolidado para procedimentos não listadosa
+    # 2. Criar DataFrame consolidado para procedimentos não listados (apenas completo)
     if nao_listados_consolidados:
-        # Começar com o primeiro município que tem não listados
-        df_nao_listados = pd.DataFrame(nao_listados_consolidados[0])
+        # Converter dicionário para DataFrame
+        df_nao_listados = pd.DataFrame.from_dict(nao_listados_consolidados, orient='index')
         
-        # Juntar os outros municípios
-        for i in range(1, len(nao_listados_consolidados)):
-            if nao_listados_consolidados[i]["Procedimento Nao listados"]:
-                df_temp = pd.DataFrame(nao_listados_consolidados[i])
-                # Mesclar pelo nome do procedimento
-                df_nao_listados = pd.merge(df_nao_listados, df_temp, on="Procedimento Nao listados", how="outer")
+        # Garantir que todas as colunas (municípios) existam
+        for municipio in municipios:
+            if municipio not in df_nao_listados.columns:
+                df_nao_listados[municipio] = 0
+        
+        # Ordenar por soma total (decrescente)
+        df_nao_listados['TOTAL'] = df_nao_listados[municipios].sum(axis=1)
+        df_nao_listados = df_nao_listados.sort_values('TOTAL', ascending=False)
+        
+        # Reset index para ter a coluna "Procedimento"
+        df_nao_listados = df_nao_listados.reset_index()
+        df_nao_listados = df_nao_listados.rename(columns={'index': 'Procedimento'})
         
         # Preencher NaN com 0
         df_nao_listados = df_nao_listados.fillna(0)
         
-        # Salvar arquivo consolidado de não listados
-        df_nao_listados.to_excel("Prestador/prontobaby/resultado/CONSOLIDADO_NAO_LISTADOS.xlsx", index=False)
-        print("✓ Arquivo consolidado de não listados criado: CONSOLIDADO_NAO_LISTADOS.xlsx")
+        # Salvar arquivo consolidado de não listados (apenas completo)
+        caminho_nao_listados = "Prestador/prontobaby/resultado/CONSOLIDADO_NAO_LISTADOS.xlsx"
+        df_nao_listados.to_excel(caminho_nao_listados, index=False)
+        print(f"\n✓ Arquivo consolidado de não listados criado: {caminho_nao_listados}")
+        print(f"  Total de procedimentos não listados: {len(df_nao_listados)}")
     else:
-        print("✗ Nenhum procedimento não listado encontrado para criar arquivo consolidado")
+        print("\n✗ Nenhum procedimento não listado encontrado")
     
     print(f"\n=== PROCESSAMENTO CONCLUÍDO ===")
     print(f"Total de municípios processados: {len(municipios)}")
