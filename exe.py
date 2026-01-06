@@ -4,6 +4,7 @@ import shutil
 import os
 import platform
 import subprocess
+from juntar import executar_macro
 from main import main as exe_main
 from separarRelatorio.main import processar_todos_arquivos_simplificado as processar_arquivos
 from tkinter import font as tkfont
@@ -438,6 +439,14 @@ def submit():
         # Reabilitar botão
         submit_button.config(state='normal', text="Processar Arquivos")
 
+def execMacro():
+    executar_macro()
+    messagebox.showinfo(
+        "Sucesso!",
+        "✅ Atualização concluída com sucesso!\n\n"
+        "Os relatórios foram atualizados"
+    )
+
 # Frame para o botão de ação
 action_frame = tk.Frame(main_frame, bg=COLORS['background'])
 action_frame.pack(fill='x', pady=(10, 0))
@@ -459,6 +468,23 @@ submit_button = tk.Button(
     borderwidth=0
 )
 submit_button.pack()
+
+submit_enviar = tk.Button(
+    action_frame,
+    text="🚀 Atualizar dados",
+    command=execMacro,
+    font=("Segoe UI", 13, "bold"),
+    bg=COLORS['warning'],
+    fg='white',
+    activebackground="#bd8e38",
+    activeforeground='white',
+    relief='flat',
+    padx=40,
+    pady=10,
+    cursor='hand2',
+    borderwidth=0
+)
+submit_enviar.pack(pady=(25, 0))
 
 # Footer
 footer_frame = tk.Frame(main_frame, bg=COLORS['background'])

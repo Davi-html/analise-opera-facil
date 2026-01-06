@@ -20,7 +20,7 @@ def pacote_adeno():
     return carregar("ADENOIDECTOMIA PEDIÁTRICO")
 
 def pacote_amig():
-    return carregar("AMIGDALECTOMIA - PEDIATRICO")
+    return carregar("AMIGDALECTOMIA- PEDIATRICO")
 
 def pacote_amig_adeno():
     return carregar("AMIGDALECTOMIA COM ADENOIDECTOMIA - PEDIATRICO")
