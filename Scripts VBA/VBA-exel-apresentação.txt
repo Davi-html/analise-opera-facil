@@ -1,0 +1,93 @@
+Sub ConsolidarTodosDados()
+    Dim wbPrincipal As Workbook
+    Dim wbFonte As Workbook
+    Dim wsPrincipal As Worksheet
+    Dim wsFonte As Worksheet
+    Dim ultimaLinhaPrincipal As Long
+    Dim arquivos(1 To 3) As Variant
+    Dim i As Integer
+    Dim caminho As String
+    
+    
+    arquivos(1) = "C:\Users\luana\Desktop\analise-opera-facil\analise_financeiro\apresentação-Neomater.xlsx"
+    arquivos(2) = "C:\Users\luana\Desktop\analise-opera-facil\analise_financeiro\apresentação-Neotin.xlsx"
+    arquivos(3) = "C:\Users\luana\Desktop\analise-opera-facil\analise_financeiro\apresentação-Pediatrico.xlsx"
+    
+    Set wbPrincipal = ThisWorkbook
+    Set wsPrincipal = wbPrincipal.Worksheets(1)
+    
+    Application.ScreenUpdating = False
+    
+    ' Iniciar na linha 2
+    ultimaLinhaPrincipal = 2
+    
+    ' Verificar se já há dados
+    If wsPrincipal.Cells(2, 1).Value <> "" Then
+        ultimaLinhaPrincipal = wsPrincipal.Cells(wsPrincipal.Rows.Count, 1).End(xlUp).Row + 1
+    End If
+    
+    For i = 1 To 3
+        If Dir(arquivos(i)) = "" Then
+            MsgBox "Arquivo " & i & " não encontrado", vbExclamation
+            GoTo Proximo
+        End If
+        
+        Set wbFonte = Workbooks.Open(arquivos(i), ReadOnly:=True)
+        Set wsFonte = wbFonte.Worksheets(1)
+        
+        ' MÉTODO SIMPLES E EFETIVO: Usar UsedRange para pegar TUDO
+        Dim ultimaLinhaFonte As Long
+        Dim ultimaColunaFonte As Long
+        
+        ' Encontrar última linha real com dados (a partir da linha 2)
+        ultimaLinhaFonte = wsFonte.UsedRange.Rows.Count
+        
+        ' Se UsedRange começar depois da linha 1, ajustar
+        If wsFonte.UsedRange.Row > 1 Then
+            ultimaLinhaFonte = wsFonte.UsedRange.Row + wsFonte.UsedRange.Rows.Count - 1
+        End If
+        
+        ' Encontrar última coluna do UsedRange
+        ultimaColunaFonte = wsFonte.UsedRange.Column + wsFonte.UsedRange.Columns.Count - 1
+        
+        ' Se não há dados além da linha 1, pular
+        If ultimaLinhaFonte <= 1 Then
+            GoTo Fechar
+        End If
+        
+        ' Determinar linha inicial para cópia
+        Dim linhaInicio As Long
+        linhaInicio = 2
+        
+        ' Definir intervalo para cópia (da linha 2 até o final)
+        Dim rngCopiar As Range
+        Set rngCopiar = wsFonte.Range(wsFonte.Cells(linhaInicio, 1), wsFonte.Cells(ultimaLinhaFonte, ultimaColunaFonte))
+        
+        ' Verificar se há dados para copiar
+        If Application.WorksheetFunction.CountA(rngCopiar) > 0 Then
+            ' Copiar apenas valores
+            Dim rngDestino As Range
+            Set rngDestino = wsPrincipal.Cells(ultimaLinhaPrincipal, 1).Resize(rngCopiar.Rows.Count, rngCopiar.Columns.Count)
+            rngDestino.Value = rngCopiar.Value
+            
+            ' Atualizar linha para próximo arquivo
+            ultimaLinhaPrincipal = ultimaLinhaPrincipal + rngCopiar.Rows.Count
+        End If
+        
+Fechar:
+        wbFonte.Close SaveChanges:=False
+        
+Proximo:
+    Next i
+    
+    Application.ScreenUpdating = True
+    
+    MsgBox "Consolidação concluída! Todos os dados foram copiados.", vbInformation
+    
+    Set rngCopiar = Nothing
+    Set rngDestino = Nothing
+    Set wsFonte = Nothing
+    Set wbFonte = Nothing
+    Set wsPrincipal = Nothing
+    Set wbPrincipal = Nothing
+End Sub

@@ -4,7 +4,7 @@ import shutil
 import os
 import platform
 import subprocess
-from juntar import executar_macro
+from atualizar import executar_macro_atualizar
 from main import main as exe_main
 from separarRelatorio.main import processar_todos_arquivos_simplificado as processar_arquivos
 from tkinter import font as tkfont
@@ -440,7 +440,7 @@ def submit():
         submit_button.config(state='normal', text="Processar Arquivos")
 
 def execMacro():
-    executar_macro()
+    executar_macro_atualizar()
     messagebox.showinfo(
         "Sucesso!",
         "✅ Atualização concluída com sucesso!\n\n"

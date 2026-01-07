@@ -1,0 +1,87 @@
+Sub juntarProntobaby()
+
+    Dim wb1 As Workbook
+    Dim wb2 As Workbook
+    Dim ws1 As Worksheet
+    Dim ws2 As Worksheet
+    Dim ultimaColuna As Long
+    Dim colunaDestino As Long
+    Dim ultimaLinha2 As Long
+    Dim ultimaColuna2 As Long
+    Dim i As Long
+    Dim primeiroConteudo As Long
+    Dim primeiraVaga As Long
+    
+    ' Excel 1 = o próprio arquivo
+    Set wb1 = ThisWorkbook
+    Set wb2 = Workbooks.Open("S:\OBSERVATORIO\PROJETOS\BI e Afins\Opera facil\analise-opera-facil\Prestador\prontobaby\resultado\relatorio_prontobaby_APENAS_VALORES.xlsx")
+    
+    Set ws1 = wb1.Sheets(7)
+    Set ws2 = wb2.Sheets(1)
+    
+    ' Encontrar a primeira coluna COM conteúdo na linha 2
+    primeiroConteudo = 0
+    For i = 1 To ws1.Columns.Count
+        If Not IsEmpty(ws1.Cells(3, i)) Then
+            primeiroConteudo = i
+            Exit For
+        End If
+    Next i
+    
+    ' Se não encontrou nenhum conteúdo, começar na coluna 1
+    If primeiroConteudo = 0 Then
+        colunaDestino = 1
+    Else
+        ' Procurar o primeiro espaço vazio APÓS o primeiro conteúdo
+        primeiraVaga = 0
+        For i = primeiroConteudo + 1 To ws1.Columns.Count
+            If IsEmpty(ws1.Cells(3, i)) Then
+                primeiraVaga = i
+                Exit For
+            End If
+        Next i
+        
+        ' Se encontrou espaço vazio, usar ele
+        If primeiraVaga > 0 Then
+            colunaDestino = primeiraVaga
+        Else
+            ' Se não encontrou espaço vazio, usar após o último conteúdo
+            ultimaColuna = ws1.Cells(3, ws1.Columns.Count).End(xlToLeft).Column
+            colunaDestino = ultimaColuna + 1
+        End If
+    End If
+    
+    ' Tamanho do Excel 2
+    ultimaLinha2 = ws2.Cells(ws2.Rows.Count, 1).End(xlUp).Row
+    ultimaColuna2 = ws2.Cells(1, ws2.Columns.Count).End(xlToLeft).Column
+    
+    ' Verificar se há espaço suficiente para colar
+    Dim espacoDisponivel As Long
+    espacoDisponivel = 0
+    For i = colunaDestino To ws1.Columns.Count
+        If Not IsEmpty(ws1.Cells(3, i)) Then
+            Exit For
+        End If
+        espacoDisponivel = espacoDisponivel + 1
+    Next i
+    
+    ' Se não houver espaço suficiente, usar após o último conteúdo
+    If espacoDisponivel < ultimaColuna2 Then
+        ultimaColuna = ws1.Cells(3, ws1.Columns.Count).End(xlToLeft).Column
+        colunaDestino = ultimaColuna + 1
+    End If
+    
+    ' Copiar Excel 2
+    ws2.Range(ws2.Cells(1, 1), ws2.Cells(ultimaLinha2, ultimaColuna2)).Copy
+    
+    ' Colar a partir da LINHA 2
+    ws1.Cells(3, colunaDestino).PasteSpecial xlPasteValues
+    
+    Application.CutCopyMode = False
+    
+    ' Salvar Excel 1
+    wb1.Save
+    
+    ' Fechar Excel 2 sem salvar
+    wb2.Close SaveChanges:=False
+End Sub
