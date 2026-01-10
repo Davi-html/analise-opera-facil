@@ -8,7 +8,7 @@ from atualizar import executar_macro_atualizar
 from main import main as exe_main
 from separarRelatorio.main import processar_todos_arquivos_simplificado as processar_arquivos
 from tkinter import font as tkfont
-
+# Classe para abrir pastas no explorador de arquivos
 class AbrirPasta:
     @staticmethod
     def abrir(caminho):
