@@ -3,7 +3,7 @@ from pathlib import Path
 
 # Caminho do arquivo Excel com a macro
 CAMINHO_EXCEL_ATUALIZAR = Path.home() / "Downloads" / "Atualizar - OPERA FACIL.xlsm"
-CAMINHO_EXCEL_APRESENTACAO = Path.home() / "Downloads" / "Apresentação - OPERA FACIL.xlsm"
+CAMINHO_EXCEL_APRESENTACAO = Path.home() / "Downloads" / "apresentação - OPERA FACIL.xlsm"
 
 # Nome da macro
 def executar_macro_atualizar():

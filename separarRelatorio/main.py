@@ -8,12 +8,6 @@ load_dotenv()
 
 
 def criar_planilha_municipio_colunas(caminho_arquivo):
-    """
-    Cria uma planilha onde cada município tem 3 colunas:
-    1. Paciente [municipio]
-    2. [municipio]  (apenas o nome do município)
-    3. Quantidade [municipio]
-    """
     
     wb = load_workbook(caminho_arquivo)
     ws = wb.active
@@ -277,54 +271,7 @@ def processar_relatorio_simplificado(caminho_arquivo):
         print(f"ERRO ao salvar arquivo: {str(e)}")
         return None
     
-    
-    print("\nRESUMO DO ARQUIVO:")
-    print("-" * 60)
-    
-    if df_municipio_colunas is not None:
-        print(f"• Planilha 'Por Municipio Colunas':")
-        print(f"  - Municipios: {len(municipios_encontrados)}")
-        print(f"  - Colunas: {len(df_municipio_colunas.columns)}")
-        print(f"  - Linhas: {len(df_municipio_colunas)}")
-    
-    if df_dados_detalhados is not None:
-        print(f"• Planilha 'Dados Detalhados':")
-        print(f"  - Registros: {len(df_dados_detalhados)}")
-        print(f"  - Colunas: {len(df_dados_detalhados.columns)}")
-    
-    
-    if df_municipio_colunas is not None and len(municipios_encontrados) > 0:
-        print(f"\nEXEMPLO DO NOVO FORMATO 'Por Municipio Colunas':")
-        print("=" * 100)
-        
-        
-        print(f"\nEstrutura das colunas (primeiros 2 municipios como exemplo):")
-        for municipio in municipios_encontrados[:2]:
-            print(f"  • Paciente {municipio}")
-            print(f"  • {municipio}")  
-            print(f"  • Quantidade {municipio}")
-        
-        
-        if len(df_municipio_colunas) > 0:
-            print(f"\nPrimeiras 2 linhas de exemplo:")
-            print("-" * 80)
-            
-            for i in range(min(2, len(df_municipio_colunas))):
-                print(f"Linha {i+1}:")
-                
-                
-                for municipio in municipios_encontrados[:2]:  
-                    paciente_col = f'Paciente {municipio}'
-                    
-                    if paciente_col in df_municipio_colunas.columns:
-                        paciente = df_municipio_colunas.iloc[i][paciente_col]
-                        if pd.notna(paciente):
-                            print(f"  Municipio: {municipio}")
-                            print(f"    Paciente: {paciente}")
-                            print(f"    Procedimento: {df_municipio_colunas.iloc[i][f'{municipio}']}")
-                            print(f"    Quantidade: {df_municipio_colunas.iloc[i][f'Quantidade {municipio}']}")
-                print("-" * 40)
-    
+
     return {
         'df_municipio_colunas': df_municipio_colunas,
         'df_dados_detalhados': df_dados_detalhados,
@@ -354,19 +301,15 @@ def processar_todos_arquivos_simplificado():
             arquivos_str = arquivos_str[2:-2]
         
         arquivos = [arquivo.strip() for arquivo in arquivos_str.split(',') if arquivo.strip()]
-    
-    print(f"Total de arquivos a processar: {len(arquivos)}")
+
     
     resultados = []
     arquivos_processados = 0
     
     for arquivo in arquivos:
-        print("\n" + "=" * 80)
-        print(f"PROCESSANDO: {arquivo}")
-        print("=" * 80)
+
         
         if not os.path.exists(arquivo):
-            print(f"ERRO: Arquivo nao encontrado: {arquivo}")
             continue
         
         try:
@@ -374,21 +317,16 @@ def processar_todos_arquivos_simplificado():
             if resultado is not None:
                 resultados.append(resultado)
                 arquivos_processados += 1
-                print(f"OK: Concluido: {arquivo}")
             
         except Exception as e:
             print(f"ERRO ao processar {arquivo}: {str(e)}")
             import traceback
             traceback.print_exc()
     
-    print("\n" + "=" * 80)
-    print("PROCESSAMENTO CONCLUIDO!")
-    print("=" * 80)
     
     
     if resultados:
-        print(f"\nRESUMO GERAL:")
-        print("-" * 60)
+
         
         total_municipios = 0
         total_registros = 0
@@ -401,29 +339,9 @@ def processar_todos_arquivos_simplificado():
             if resultado['df_dados_detalhados'] is not None:
                 num_registros_detalhados = len(resultado['df_dados_detalhados'])
             
-            print(f"Arquivo: {os.path.basename(arquivo)}:")
-            print(f"   • Municipios encontrados: {num_municipios}")
-            print(f"   • Registros detalhados: {num_registros_detalhados}")
-            
             total_municipios += num_municipios
             total_registros += num_registros_detalhados
         
-        print(f"\nTOTAIS:")
-        print(f"   • Arquivos processados: {arquivos_processados}/{len(arquivos)}")
-        print(f"   • Total de municipios distintos: {total_municipios}")
-        print(f"   • Total de registros detalhados: {total_registros}")
-        
-        
-        if resultados:
-            print(f"\nESTRUTURA DOS ARQUIVOS GERADOS:")
-            print("-" * 60)
-            print(f"Todos os arquivos foram salvos na pasta: relatorios_simplificados/")
-            print(f"Cada arquivo contem 2 planilhas:")
-            print(f"  1. 'Por Municipio Colunas' - Formato com colunas por municipio")
-            print(f"      • Paciente [municipio]")
-            print(f"      • [municipio] (apenas o nome)")
-            print(f"      • Quantidade [municipio]")
-            print(f"  2. 'Dados Detalhados' - Dados completos organizados")
     
     return resultados
 
