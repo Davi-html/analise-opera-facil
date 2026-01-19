@@ -1,14 +1,42 @@
+from openpyxl import load_workbook
 import win32com.client as win32
 from pathlib import Path
+import pandas as pd
+import shutil
+from pathlib import Path
+from datetime import datetime
 
 # Caminho do arquivo Excel com a macro
 CAMINHO_EXCEL_ATUALIZAR = Path.home() / "Downloads" / "Atualizar - OPERA FACIL.xlsm"
 CAMINHO_EXCEL_APRESENTACAO = Path.home() / "Downloads" / "apresentação - OPERA FACIL.xlsm"
 
-# Nome da macro
+
+def backup_arquivo():
+    
+    timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M")
+    
+    backup_atualizar = CAMINHO_EXCEL_ATUALIZAR.with_name(
+        f"Backup_Atualizar_OPERA_FACIL_{timestamp}{CAMINHO_EXCEL_ATUALIZAR.suffix}"
+    )
+    
+    backup_apresentacao = CAMINHO_EXCEL_APRESENTACAO.with_name(
+        f"Backup_Apresentacao_OPERA_FACIL_{timestamp}{CAMINHO_EXCEL_APRESENTACAO.suffix}"
+    )
+    
+    try:
+        
+        shutil.copy2(CAMINHO_EXCEL_ATUALIZAR, backup_atualizar)
+        shutil.copy2(CAMINHO_EXCEL_APRESENTACAO, backup_apresentacao)
+        
+        return backup_atualizar, backup_apresentacao
+        
+    except Exception as e:
+        print(f"❌ Erro ao criar backup: {e}")
+        return None, None
+
 def executar_macro_atualizar():
     macros = ["juntarNeomater","juntarNeotin", "juntarProntobaby"]
-# Iniciar Excel em segundo plano
+    
     excel = win32.Dispatch("Excel.Application")
     excel.Visible = False
     excel.DisplayAlerts = False

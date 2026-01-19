@@ -683,7 +683,7 @@ submit_button = tk.Button(
 )
 submit_button.pack()
 
-submit_enviar = tk.Button(
+submit_atualizar = tk.Button(
     action_frame,
     text="🚀 Atualizar dados",
     command=execMacro,
@@ -698,7 +698,7 @@ submit_enviar = tk.Button(
     cursor='hand2',
     borderwidth=0
 )
-submit_enviar.pack(pady=(25, 0))
+submit_atualizar.pack(pady=(25, 0))
 
 footer_frame = tk.Frame(main_frame, bg=COLORS['background'])
 footer_frame.pack(fill='x', pady=(25, 0))
