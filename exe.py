@@ -655,16 +655,34 @@ def submit():
         submit_button.config(state='normal', text="Processar Arquivos")
 
 def execMacro():
-    backup_relatorio(lista_competencias.get(lista_competencias.curselection()) if lista_competencias.curselection() else None)
-    backup_arquivo()
-    executar_macro_atualizar()
-    executar_macro_apresentacao()
-    messagebox.showinfo(
-        "Sucesso!",
-        "✅ Atualização concluída com sucesso!\n\n"
-        "Os relatórios foram atualizados"
+    resposta = messagebox.askyesno(
+        "Confirmação de Atualização",
+        "Tem certeza que deseja atualizar os dados?\nEsta ação pode demorar alguns segundos."
     )
 
+    if resposta:
+        # Verificar se há uma competência selecionada
+        if lista_competencias.curselection():
+            competencia_selecionada = lista_competencias.get(lista_competencias.curselection())
+            backup_relatorio(competencia_selecionada)
+        else:
+            messagebox.showwarning(
+                "Atenção",
+                "Por favor, selecione uma competência na lista antes de continuar."
+            )
+            return  # Interrompe a execução
+        
+        backup_arquivo()
+        executar_macro_atualizar()
+        executar_macro_apresentacao()
+
+        messagebox.showinfo(
+            "Sucesso!",
+            "✅ Atualização concluída com sucesso!\n\n"
+            "Os relatórios foram atualizados"
+        )
+
+        
 action_frame = tk.Frame(main_frame, bg=COLORS['background'])
 action_frame.pack(fill='x', pady=(10, 0))
 
