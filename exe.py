@@ -606,12 +606,12 @@ def submit():
             # 2. DEPOIS chama a análise financeira com a competência selecionada
             try:
                 # Extrair apenas a competência (sem o ano) para passar para analise_financeiro
-                competencia_sem_ano = competencia_selecionada.split("/")[0] if competencia_selecionada else ""
+                competencia_sem_ano = competencia_selecionada.split('/')[0] + '/' + competencia_selecionada.split('/')[1] + '/' + competencia_selecionada.split('/')[2]
                 
                 # Chamar análise financeira para cada prestador
                 for prestador in ["Neomater", "Neotin", "Prontobaby"]:
                     try:
-                        analise_financeiro(competencia_sem_ano, ano_selecionado, prestador)
+                        analise_financeiro(competencia_sem_ano, ano_selecionado)
                         print(f"✅ Análise financeira concluída para {prestador}")
                     except Exception as e:
                         print(f"⚠️ Erro na análise financeira para {prestador}: {str(e)}")
