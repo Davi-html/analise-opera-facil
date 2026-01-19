@@ -10,16 +10,16 @@ from datetime import datetime
 CAMINHO_EXCEL_ATUALIZAR = Path.home() / "Downloads" / "Atualizar - OPERA FACIL.xlsm"
 CAMINHO_EXCEL_APRESENTACAO = Path.home() / "Downloads" / "apresentação - OPERA FACIL.xlsm"
 
-def backup_relatorio(competencia: str, nome_arquivo: str) -> Path:
+def backup_relatorio(competencia):
     caminho = "S:/OBSERVATORIO/PROJETOS/BI e Afins/Opera facil/analise-opera-facil/relatorios_simplificados"
-    
+    competencia = competencia.replace("/", "-")
+
     pasta_backup = Path(caminho) / "historico" / competencia
     pasta_backup.mkdir(parents=True, exist_ok=True)
-    
-    nome_arquivo = shutil.copy2("relatorios_simplificados/separarNeomater_SIMPLIFICADO.xlsx", pasta_backup / nome_arquivo)
-    return pasta_backup / nome_arquivo
 
-
+    shutil.copy2("relatorios_simplificados/separarNeomater_SIMPLIFICADO.xlsx", pasta_backup / "separarNeomater_SIMPLIFICADO.xlsx")
+    shutil.copy2("relatorios_simplificados/separarNeotin_SIMPLIFICADO.xlsx", pasta_backup / "separarNeotin_SIMPLIFICADO.xlsx")
+    shutil.copy2("relatorios_simplificados/separarPediatrico_SIMPLIFICADO.xlsx", pasta_backup / "separarPediatrico_SIMPLIFICADO.xlsx")
 
 def backup_arquivo():
     

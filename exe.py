@@ -4,7 +4,7 @@ import shutil
 import os
 import platform
 import subprocess
-from atualizar import executar_macro_atualizar, executar_macro_apresentacao
+from atualizar import executar_macro_atualizar, executar_macro_apresentacao, backup_relatorio, backup_arquivo
 from main import main as exe_main
 from analise_financeiro.financeiro import analise_financeiro
 
@@ -655,6 +655,8 @@ def submit():
         submit_button.config(state='normal', text="Processar Arquivos")
 
 def execMacro():
+    backup_relatorio(lista_competencias.get(lista_competencias.curselection()) if lista_competencias.curselection() else None)
+    backup_arquivo()
     executar_macro_atualizar()
     executar_macro_apresentacao()
     messagebox.showinfo(
