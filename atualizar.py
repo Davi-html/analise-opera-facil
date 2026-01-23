@@ -7,8 +7,8 @@ from pathlib import Path
 from datetime import datetime
 
 # Caminho do arquivo Excel com a macro
-CAMINHO_EXCEL_ATUALIZAR = Path.home() / "Downloads" / "Atualizar - OPERA FACIL.xlsm"
-CAMINHO_EXCEL_APRESENTACAO = Path.home() / "Downloads" / "apresentação - OPERA FACIL.xlsm"
+CAMINHO_EXCEL_ATUALIZAR = "S:/OBSERVATORIO/PROJETOS/BI e Afins/Opera facil/Atualizar - OPERA FACIL.xlsm"
+CAMINHO_EXCEL_APRESENTACAO = "S:/OBSERVATORIO/PROJETOS/BI e Afins/Opera facil/apresentação - OPERA FACIL.xlsm"
 
 def backup_relatorio(competencia):
     caminho = "S:/OBSERVATORIO/PROJETOS/BI e Afins/Opera facil/analise-opera-facil/relatorios_simplificados"
@@ -17,9 +17,15 @@ def backup_relatorio(competencia):
     pasta_backup = Path(caminho) / "historico" / competencia
     pasta_backup.mkdir(parents=True, exist_ok=True)
 
-    shutil.copy2("relatorios_simplificados/separarNeomater_SIMPLIFICADO.xlsx", pasta_backup / "separarNeomater_SIMPLIFICADO.xlsx")
-    shutil.copy2("relatorios_simplificados/separarNeotin_SIMPLIFICADO.xlsx", pasta_backup / "separarNeotin_SIMPLIFICADO.xlsx")
-    shutil.copy2("relatorios_simplificados/separarPediatrico_SIMPLIFICADO.xlsx", pasta_backup / "separarPediatrico_SIMPLIFICADO.xlsx")
+    try:
+        shutil.copy2("relatorios_simplificados/separarNeomater_SIMPLIFICADO.xlsx", pasta_backup / "separarNeomater_SIMPLIFICADO.xlsx")
+        shutil.copy2("relatorios_simplificados/separarNeotin_SIMPLIFICADO.xlsx", pasta_backup / "separarNeotin_SIMPLIFICADO.xlsx")
+        shutil.copy2("relatorios_simplificados/separarPediatrico_SIMPLIFICADO.xlsx", pasta_backup / "separarPediatrico_SIMPLIFICADO.xlsx")
+    except Exception as e:
+        print(f"❌ Erro ao criar backup dos relatórios: {e}")
+        pass
+    finally:
+        pass
 
 def backup_arquivo():
     

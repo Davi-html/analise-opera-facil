@@ -4,3 +4,6 @@ build
 dist
 *.spec
 *.exe
+dist
+build
+*.spec
