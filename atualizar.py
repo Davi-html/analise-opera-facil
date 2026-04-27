@@ -7,8 +7,12 @@ from pathlib import Path
 from datetime import datetime
 
 # Caminho do arquivo Excel com a macro
-CAMINHO_EXCEL_ATUALIZAR = "S:/OBSERVATORIO/PROJETOS/BI e Afins/Opera facil/Atualizar - OPERA FACIL.xlsm"
-CAMINHO_EXCEL_APRESENTACAO = "S:/OBSERVATORIO/PROJETOS/BI e Afins/Opera facil/apresentação - OPERA FACIL.xlsm"
+CAMINHO_EXCEL_ATUALIZAR = "S:/OBSERVATORIO/PROJETOS/BI e Afins/Opera facil/Atualizar - OPERA FACIL teste.xlsm"
+# CAMINHO_EXCEL_APRESENTACAO = "S:/OBSERVATORIO/PROJETOS/BI e Afins/Opera facil/apresentação - OPERA FACIL teste.xlsm"
+
+
+CAMINHO_EXCEL_APRESENTACAO = "C:/Users/dalves/Downloads/apresentação - OPERA FACIL teste.xlsm"
+
 
 def backup_relatorio(competencia):
     caminho = "S:/OBSERVATORIO/PROJETOS/BI e Afins/Opera facil/analise-opera-facil/relatorios_simplificados"
@@ -89,3 +93,5 @@ def executar_macro_apresentacao():
     # Limpeza (boa prática)
     del wb
     del excel
+
+executar_macro_apresentacao()

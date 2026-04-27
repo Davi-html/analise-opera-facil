@@ -20,7 +20,6 @@ def analise_financeiro(competencia, ano):
             "CORRECAO DE HIPOSPADIA (1º TEMPO) - PEDIATRICO": 6608.86,
             "PLASTICA TOTAL DO PENIS - PEDIATRICO": 6500,
             "POSTECTOMIA - PEDIATRICO": 4850
-
         }
 
         valor_unitario_pacote = {
@@ -28,7 +27,6 @@ def analise_financeiro(competencia, ano):
             "PACOTE PRÉ-OPERATÓRIO PEDIÁTRICO CIRURGIA GERAL": 300,
             "PACOTE PRÉ-OPERATÓRIO PEDIÁTRICO OFTALMOLOGISTA": 300  
         }
-
 
         tabela['municipio'] = tabela['Municipio'].astype(str).str.replace('RJ - ', '', regex=False)
 

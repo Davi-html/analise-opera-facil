@@ -292,7 +292,8 @@ def processar_todos_arquivos_simplificado():
         arquivos = [
             "separarRelatorio/separarNeomater.xlsx",
             "separarRelatorio/separarNeotin.xlsx", 
-            "separarRelatorio/separarPediatrico.xlsx"
+            "separarRelatorio/separarPediatrico.xlsx",
+            "separarRelatorio/separarSegvision.xlsx"
         ]
     else:
         

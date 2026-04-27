@@ -2,13 +2,12 @@ import pandas as pd
 from collections import Counter
 
 # Caminhos dos arquivos - ATENÇÃO: tem um erro de digitação "ralatorio" em vez de "relatorio"
-faltaNeotin = "./ralatorio_prestador/Neotin/neotin-falta.xlsx"  # CORRIGIDO
-relatorioNeotin = "./ralatorio_prestador/Neotin/neotin.xlsx"     # CORRIGIDO
+faltaNeotin = "./relatorios_simplificados/neotin-falta.xlsx"  # CORRIGIDO
+relatorioNeotin = "./relatorios_simplificados/separarNeotin_SIMPLIFICADO.xlsx"     # CORRIGIDO
 
-MUNICIPIOS = [
-    "Belford Roxo", "Duque de Caxias", "Itaguai", "Japeri", "Mage", "Mesquita",
-    "Nilopolis", "Nova Iguacu", "Paracambi", "Queimados", "Seropedica", "Sao Joao de Meriti"
-]
+MUNICIPIOS = ["RJ - Belford Roxo", "RJ - Duque de Caxias", "RJ - Itaguaí", "RJ - Japeri", 
+                  "RJ - Magé", "RJ - Mesquita", "RJ - Nilópolis", "RJ - Nova Iguaçu", 
+                  "RJ - Paracambi", "RJ - Queimados", "RJ - Seropédica", "RJ - São João de Meriti"]
 
 
 def ler_todos_pacientes_relatorio(caminho):
