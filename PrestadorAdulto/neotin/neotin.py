@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from procedimentos import procedimentos  # <-- agora você importa só isso
+from procedimentos import procedimentos
 
 
 def carregar(tabela, nome_coluna):
@@ -10,26 +10,25 @@ def carregar(tabela, nome_coluna):
     ]
 
 
-def analisar_neotin():
-    arquivo = "relatorios_simplificados/separarneotin_SIMPLIFICADO.xlsx"
+def analisar_prestador(prestador):
+    arquivo = f"relatorios_simplificados/separar{prestador}_SIMPLIFICADO.xlsx"
+
     municipios = [
         "RJ - Belford Roxo", "RJ - Duque de Caxias", "RJ - Itaguaí", "RJ - Japeri",
         "RJ - Magé", "RJ - Mesquita", "RJ - Nilópolis", "RJ - Nova Iguaçu",
         "RJ - Paracambi", "RJ - Queimados", "RJ - Seropédica", "RJ - São João de Meriti"
     ]
 
-    os.makedirs("PrestadorAdulto/neotin/resultado", exist_ok=True)
+    pasta_saida = f"PrestadorAdulto/{prestador}/resultado"
+    os.makedirs(pasta_saida, exist_ok=True)
 
-    # 🔥 CARREGA DB UMA VEZ SÓ
     tabela_base = pd.read_excel("db.xlsx")
 
-    # 🔥 GERA TODAS AS LISTAS AUTOMATICAMENTE
     listas = {
         nome: carregar(tabela_base, coluna)
         for nome, coluna in procedimentos.items()
     }
 
-    # 🔥 NOMES NA ORDEM (igual Excel)
     nomes_grupos = list(procedimentos.values())
 
     dados_consolidados = {
@@ -37,11 +36,9 @@ def analisar_neotin():
         for nome in nomes_grupos
     }
 
-    nao_listados_consolidados = {}
-
     for municipio in municipios:
         try:
-            print(f"\n=== PROCESSANDO {municipio} ===")
+            print(f"\n=== PROCESSANDO {prestador} - {municipio} ===")
 
             tabela = pd.read_excel(arquivo)
 
@@ -52,7 +49,6 @@ def analisar_neotin():
                 print(f"  Aviso: Colunas não encontradas")
                 continue
 
-            # 🔥 GRUPOS AUTOMÁTICOS
             grupos = {
                 procedimentos[chave]: listas[chave]
                 for chave in procedimentos
@@ -82,19 +78,18 @@ def analisar_neotin():
         except Exception as e:
             print(f"Erro em {municipio}: {e}")
 
-    # 🔥 GERAR DATAFRAME FINAL
     df = pd.DataFrame.from_dict(dados_consolidados, orient='index')
     df = df[municipios]
     df = df.loc[nomes_grupos]
 
     df.loc['TOTAL'] = df.sum()
 
-    # RELATÓRIO COMPLETO
-    caminho = "PrestadorAdulto/neotin/resultado/relatorio_final.xlsx"
-    df.reset_index().rename(columns={"index": "Procedimento"}).to_excel(caminho, index=False)
+    caminho = f"{pasta_saida}/relatorio_final.xlsx"
+
+    (
+        df.reset_index()
+        .rename(columns={"index": "Procedimento"})
+        .to_excel(caminho, index=False)
+    )
 
     print(f"\n✅ Relatório gerado: {caminho}")
-
-
-if __name__ == "__main__":
-    analisar_neotin()

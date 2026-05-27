@@ -282,68 +282,51 @@ def processar_relatorio_simplificado(caminho_arquivo):
 
 def processar_todos_arquivos_simplificado():
     """
-    Processa todos os arquivos listados na variável de ambiente
-    mantendo apenas as 2 planilhas solicitadas.
+    Processa todos os prestadores automaticamente
     """
     
-    arquivos_str = os.getenv("separarArquivo", "")
-    
-    if not arquivos_str:
-        arquivos = [
-            "separarRelatorio/separarNeomater.xlsx",
-            "separarRelatorio/separarNeotin.xlsx", 
-            "separarRelatorio/separarPediatrico.xlsx",
-            "separarRelatorio/separarSegvision.xlsx"
-        ]
-    else:
-        
-        arquivos_str = arquivos_str.strip()
-        if arquivos_str.startswith('["') and arquivos_str.endswith('"]'):
-            arquivos_str = arquivos_str[2:-2]
-        
-        arquivos = [arquivo.strip() for arquivo in arquivos_str.split(',') if arquivo.strip()]
+    pasta_base = "separarRelatorio"
 
-    
+    prestadores = [
+        "Neomater",
+        "Neotin",
+        "Pediatrico",
+        "Segvision",
+        "Uroclin",
+        "Pronil",
+        "Desam",
+        "Vivermais",
+        "Catarina"
+    ]
+
+    arquivos = [
+        os.path.join(pasta_base, f"separar{prestador}.xlsx")
+        for prestador in prestadores
+    ]
+
     resultados = []
     arquivos_processados = 0
-    
+
     for arquivo in arquivos:
 
-        
         if not os.path.exists(arquivo):
+            print(f"⚠️ Arquivo não encontrado: {arquivo}")
             continue
-        
+
         try:
             resultado = processar_relatorio_simplificado(arquivo)
+
             if resultado is not None:
                 resultados.append(resultado)
                 arquivos_processados += 1
-            
+
         except Exception as e:
             print(f"ERRO ao processar {arquivo}: {str(e)}")
             import traceback
             traceback.print_exc()
-    
-    
-    
-    if resultados:
 
-        
-        total_municipios = 0
-        total_registros = 0
-        
-        for resultado in resultados:
-            arquivo = resultado['arquivo_saida']
-            num_municipios = len(resultado['municipios_encontrados'])
-            
-            num_registros_detalhados = 0
-            if resultado['df_dados_detalhados'] is not None:
-                num_registros_detalhados = len(resultado['df_dados_detalhados'])
-            
-            total_municipios += num_municipios
-            total_registros += num_registros_detalhados
-        
-    
+    print(f"\n✅ TOTAL PROCESSADOS: {arquivos_processados}")
+
     return resultados
 
 
